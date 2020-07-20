@@ -208,7 +208,7 @@ export namespace MathParser {
          * @param val El nuevo valor de la constante.
          */
         public constant(name: string, val: number): Parser {
-            var c = this.constants.search(name);
+            let c = this.constants.search(name);
             if(!c) {
                 if(name !== null && val !== null) {
                     this.constants.list.push(new Const(name, val));
@@ -339,14 +339,14 @@ export namespace MathParser {
             while(str.match(this.patterns.constant))
             str = str.replace(this.patterns.constant, (match: string) => {
                 // Obtener partes de la coincidencia
-                var matches: Array<string> = this.patterns.constant.exec(match);
+                let matches: Array<string> = this.patterns.constant.exec(match);
                 if(!matches)
                     return match;
                 
                 // Caracter anterior al nombre de la constante
-                var backwards = matches[1];
+                let backwards = matches[1];
                 // Nombre de la constante
-                var constName = matches[2];
+                let constName = matches[2];
 
                 // Si el caracter anterior es un número
                 // (p.e: 2sqrt),
@@ -377,15 +377,15 @@ export namespace MathParser {
             while(str.match(this.patterns.group))
             str = str.replace(this.patterns.group, (match: string) => {
                 // Obtener partes de la coincidencia
-                var matches: Array<string> = this.patterns.group.exec(match);
+                let matches: Array<string> = this.patterns.group.exec(match);
                 if(!matches) return match;
 
                 // Caracter anterior al nombre de la función
-                var backwards: string = matches[1];
+                let backwards: string = matches[1];
                 // Nombre de la función
-                var funcName: string = matches[2];
+                let funcName: string = matches[2];
                 // Parámetros de la función
-                var funcParams: Array<string> = matches[3].split(/\s*\,\s*/);
+                let funcParams: Array<string> = matches[3].split(/\s*\,\s*/);
 
                 // Si el caracter anterior es un número
                 // (p.e: 2sqrt),
@@ -396,7 +396,7 @@ export namespace MathParser {
 
                 // Ejecutar los parámetros de la función para obtener
                 // sus resultados como números reales.
-                var params: Array<number> = new Array<number>();
+                let params: Array<number> = new Array<number>();
                 // Recorrer la lista de parámetros
                 funcParams.forEach((it: string) => {
                     // Si el parámetro no está vacío
@@ -406,12 +406,12 @@ export namespace MathParser {
                     }
                 });
                 // Resultado del grupo/función.
-                var result: number;
+                let result: number;
 
                 // Si el grupo es una función (p.e: 1 + sqrt(x) )
                 if(funcName) {
                     // Buscar la función con ese nombre
-                    var func: Func = this.functions.search(funcName);
+                    let func: Func = this.functions.search(funcName);
                     
                     // Lanzar error en caso de que la función no exista.
                     if(!func) {
@@ -492,8 +492,8 @@ export namespace MathParser {
          * @param call La función que se ejecutará después de cada ejecución.
          */
         public repeat(n: number, call: Function = null): Parser {
-            for(var i = 0; i < n; i++) {
-                var r = this.execute();
+            for(let i = 0; i < n; i++) {
+                let r = this.execute();
                 if(call !== null) {
                     call.apply(this, [r, i + 1]);
                 }
