@@ -93,15 +93,15 @@ var MathParser;
             this.patterns = {
                 empty: /^(\s*)$/,
                 addition: /((?:\+|-)+)/ig,
-                constant: /([a-zA-Z_][a-zA-Z0-9_]*)/ig,
-                group: /([^a-zA-Z_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i
+                constant: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)/i,
+                group: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i
             };
             this.numberPattern = "((?:\\+|-)?[0-9]+(?:\\.[0-9]+)?(?:E(?:\\+|-)?[0-9]+)?)";
             this.numberExp = new RegExp(this.numberPattern, 'ig');
             this.mathPatterns = [
-                new RegExp(this.numberPattern + "(\\^)" + this.numberPattern),
-                new RegExp(this.numberPattern + "(\\*|\\/|%)" + this.numberPattern),
-                new RegExp(this.numberPattern + "(\\+|-)" + this.numberPattern)
+                new RegExp(this.numberPattern + "(\\^)" + this.numberPattern, 'i'),
+                new RegExp(this.numberPattern + "(\\*|\\/|%)" + this.numberPattern, 'i'),
+                new RegExp(this.numberPattern + "(\\+|-)" + this.numberPattern, 'i')
             ];
             this.constants = new Searchable();
             this.functions = new Searchable();
@@ -198,13 +198,22 @@ var MathParser;
         };
         Parser.prototype.parseConstants = function (str) {
             var _this = this;
-            str = str.replace(this.patterns.constant, function (match) {
-                var c = _this.constants.search(match);
-                if (!c) {
-                    throw new Error(ErrorInfo.refference(match));
-                }
-                return c.value.toString();
-            });
+            while (str.match(this.patterns.constant))
+                str = str.replace(this.patterns.constant, function (match) {
+                    var matches = _this.patterns.constant.exec(match);
+                    if (!matches)
+                        return match;
+                    var backwards = matches[1];
+                    var constName = matches[2];
+                    if (backwards.match(_this.numberExp)) {
+                        throw new Error(ErrorInfo.syntax(backwards + constName));
+                    }
+                    var c = _this.constants.search(constName);
+                    if (!c) {
+                        throw new Error(ErrorInfo.refference(constName));
+                    }
+                    return backwards + c.value.toString();
+                });
             return this.parseArithmetic(str);
         };
         Parser.prototype.parseGroup = function (str) {
@@ -253,20 +262,24 @@ var MathParser;
             var result = 0;
             try {
                 result = this.parseGroup(str);
-                this.finally(result);
+                if (this.finally !== null)
+                    this.finally.apply(this, [result]);
             }
             catch (error) {
-                this.exception(error);
+                if (this.exception !== null)
+                    this.exception.apply(this, [error]);
             }
             finally {
                 return result;
             }
         };
         Parser.prototype.catch = function (err) {
+            if (err === void 0) { err = null; }
             this.exception = err;
             return this;
         };
         Parser.prototype.then = function (fun) {
+            if (fun === void 0) { fun = null; }
             this.finally = fun;
             return this;
         };
@@ -279,7 +292,7 @@ var MathParser;
             for (var i = 0; i < n; i++) {
                 var r = this.execute();
                 if (call !== null) {
-                    call.apply(this, [r, i]);
+                    call.apply(this, [r, i + 1]);
                 }
             }
             return this;

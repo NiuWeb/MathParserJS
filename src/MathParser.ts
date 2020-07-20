@@ -149,8 +149,8 @@ export namespace MathParser {
         private patterns = {
             empty:    /^(\s*)$/,
             addition: /((?:\+|-)+)/ig,
-            constant: /([a-zA-Z_][a-zA-Z0-9_]*)/ig,
-            group:    /([^a-zA-Z_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i
+            constant: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)/i,
+            group:    /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i
         };
         // RegExp de un número real, como string y como objeto.
         private numberPattern: string = "((?:\\+|-)?[0-9]+(?:\\.[0-9]+)?(?:E(?:\\+|-)?[0-9]+)?)";
@@ -160,11 +160,11 @@ export namespace MathParser {
         private mathPatterns: Array<RegExp> = [
 
             // Potencias
-            new RegExp(this.numberPattern + "(\\^)" + this.numberPattern),
+            new RegExp(this.numberPattern + "(\\^)" + this.numberPattern, 'i'),
             // Multiplicación, división y módulo
-            new RegExp(this.numberPattern + "(\\*|\\/|%)" + this.numberPattern),
+            new RegExp(this.numberPattern + "(\\*|\\/|%)" + this.numberPattern, 'i'),
             // Suma y resta
-            new RegExp(this.numberPattern + "(\\+|-)" + this.numberPattern)
+            new RegExp(this.numberPattern + "(\\+|-)" + this.numberPattern, 'i')
 
         ];
 
@@ -287,11 +287,10 @@ export namespace MathParser {
                     return '-';
                 });;
             });
-
+            
             // Evaluar las operaciones aritméticas en el orden jerárquico correspondiente
             let matches: Array<string>;
             this.mathPatterns.forEach((exp: RegExp) => {
-
                 // Buscar coincidencias de la forma AoB
                 while(str.match(exp))
                 // Reemplazar coincidencia por su valor evaluado
@@ -302,7 +301,7 @@ export namespace MathParser {
                     matches = exp.exec(input); 
                     if(!matches) // Si no se encontraron las partes
                         return 'NaN'; // Devolver Nan
-                    
+
                     // Partes de la operación AoB
                     let A: number = parseFloat(matches[1]);
                     let B: number = parseFloat(matches[3]);
@@ -337,15 +336,33 @@ export namespace MathParser {
          */
         private parseConstants(str: string):number {
             // Buscar todos los nombres de constantes en la cadena
+            while(str.match(this.patterns.constant))
             str = str.replace(this.patterns.constant, (match: string) => {
+                // Obtener partes de la coincidencia
+                var matches: Array<string> = this.patterns.constant.exec(match);
+                if(!matches)
+                    return match;
+                
+                // Caracter anterior al nombre de la constante
+                var backwards = matches[1];
+                // Nombre de la constante
+                var constName = matches[2];
+
+                // Si el caracter anterior es un número
+                // (p.e: 2sqrt),
+                if(backwards.match(this.numberExp)) {
+                    // Lanzar error
+                    throw new Error(ErrorInfo.syntax(backwards + constName));
+                }
+
                 // Buscar la constante que corresponda con el nombre actual
-                let c: Const = this.constants.search(match);
+                let c: Const = this.constants.search(constName);
                 if(!c) {
                     // Lanzar error si no se encontró
-                    throw new Error(ErrorInfo.refference(match));
+                    throw new Error(ErrorInfo.refference(constName));
                 }
                 // Devolver el valor de la constante
-                return c.value.toString();
+                return backwards + c.value.toString();
             });
             // Evaluar la expresión resultante
             return this.parseArithmetic(str);
@@ -431,10 +448,12 @@ export namespace MathParser {
             let result = 0;
             try {
                 result = this.parseGroup(str);
-                this.finally(result);
+                if(this.finally !== null)
+                    this.finally.apply(this, [result]);
             }
             catch(error) {
-                this.exception(error);
+                if(this.exception !== null)
+                    this.exception.apply(this, [error]);
             }
             finally {
                 return result;
@@ -445,7 +464,7 @@ export namespace MathParser {
          * encuentra algún error.
          * @param err El callback en caso de error
          */
-        public catch(err: Function): Parser {
+        public catch(err: Function = null): Parser {
             this.exception = err;
             return this;
         }
@@ -454,7 +473,7 @@ export namespace MathParser {
          * ejecute correctamente una cadena.
          * @param fun El callback en caso de éxito.
          */
-        public then(fun: Function): Parser {
+        public then(fun: Function = null): Parser {
             this.finally = fun;
             return this;
         }
@@ -476,7 +495,7 @@ export namespace MathParser {
             for(var i = 0; i < n; i++) {
                 var r = this.execute();
                 if(call !== null) {
-                    call.apply(this, [r, i]);
+                    call.apply(this, [r, i + 1]);
                 }
             }
             return this;
