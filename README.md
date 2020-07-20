@@ -81,4 +81,4 @@ Evalúa una cantidad determinada de veces la cadena de texto establecida por `se
     ```ts
     callback(r: number, i: number)
     ```
-Donde `r` es el resultado de la última evaluación realizada, e `i` es el número de la evaluación actual, desde 1 hasta `n`.
+    Donde `r` es el resultado de la última evaluación realizada, e `i` es el número de la evaluación actual, desde 1 hasta `n`.
