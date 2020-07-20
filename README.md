@@ -38,7 +38,7 @@ const parser = new MathParser.Parser({
 
 # Métodos
 ## `set(str: string)`
-Establece la cadena que se el intérprete va a evaluar.
+Establece la cadena que el intérprete va a evaluar.
 
 **Parámetros:**
 - `str`: La cadena de texto a establecer.
@@ -48,11 +48,11 @@ Establece la cadena que se el intérprete va a evaluar.
 **Ejemplo:**
 ```ts
 parser.set("4 * (2+ 3)");
-var r = parser.execute(); 
+let r = parser.execute(); 
 console.log(r); // Imprime 20.
 
 //otra forma
-var r  = parser.set("1 + 1/2 + 1/4").execute();
+let r  = parser.set("1 + 1/2 + 1/4").execute();
 console.log(r); // Imprime 1.75
 ```
 
@@ -68,7 +68,7 @@ establecida por el método `set()`.
 
 **Ejemplo:**
 ```ts
-var r = parser.execute("cos(pi) - 6/2*(2+1)");
+let r = parser.execute("cos(pi) - 6/2*(2+1)");
 console.log(r); // Imprime -10
 ```
 
@@ -82,3 +82,22 @@ Evalúa una cantidad determinada de veces la cadena de texto establecida por `se
     callback(r: number, i: number)
     ```
     Donde `r` es el resultado de la última evaluación realizada, e `i` es el número de la evaluación actual, desde 1 hasta `n`.
+
+**Ejemplo:**
+```ts
+let x = 0;
+const parser = new MathParser.Parser({x: 0})
+.set("x^2")
+.repeat(5, function(r) {
+    console.log(r);
+    this.constant("x", ++x);
+});
+/*
+Imprime:
+0
+1
+4
+9
+16
+*/
+```
