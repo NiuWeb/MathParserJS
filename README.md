@@ -15,10 +15,11 @@ const MathParser = require("./MathParser").MathParser;
 ```
 
 # Clase Parser
-## Constructor `parser(list)`
+## Constructor `Parser(list)`
 ```ts
 MathParser.Parser(list);
 ```
+
 **Parámetros:**
 - `list`: Un objeto con las constantes/funciones que debe evaluar el intérprete, y sus respectivos valores/métodos.
 
@@ -38,9 +39,12 @@ const parser = new MathParser.Parser({
 # Métodos
 ## `set(str: string)`
 Establece la cadena que se el intérprete va a ejecutar.
+
 **Parámetros:**
 - `str`: La cadena de texto a establecer.
+
 **Devuelve:** `MathParser` La instancia de `MathParser` que ejecutó el método.
+
 **Ejemplo:**
 ```ts
 var r = parser.set("4 * (2+ 3)").execute(); 
@@ -51,9 +55,12 @@ console.log(r); // Imprime 20.
 Interpreta los comandos de la cadena de texto dada y devuelve el valor final.
 Si no se especifica el parámetro `str`, se ejecutará por defecto la cadena
 establecida por el método `set()`.
+
 **Parámetros:**
 - `str`: La cadena de texto a interpretar.
+
 **Devuelve:** `number` El resultado de la evaluación.
+
 **Ejemplo:**
 ```ts
 var r = parser.execute("cos(pi) - 6/2*(2+1)");
