@@ -1,0 +1,27 @@
+{
+  "name": "mathparserjs",
+  "version": "1.0.0",
+  "description": "Un intérprete de comandos escritos dentro de cadenas de texto.",
+  "main": "built/mathparser.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NiuWeb/MathParserJS.git"
+  },
+  "keywords": [
+    "math",
+    "parser",
+    "interpeter",
+    "interprete",
+    "eval",
+    "command"
+  ],
+  "author": "Daniel Felipe García Gómez",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NiuWeb/MathParserJS/issues"
+  },
+  "homepage": "https://github.com/NiuWeb/MathParserJS#readme"
+}
