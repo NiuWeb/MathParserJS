@@ -11,6 +11,7 @@ var parser = new MathParser_1.MathParser.Parser(Functions_1.functions)
 });
 parser.execute("(1 + 5^0.5)/2");
 parser.execute("sin(pi/2)^2 + cos(pi/2)^2");
+parser.execute("cos(pi) - 6/2*(2+1)");
 console.log("====TABLA DE VALORES====");
 parser.constant("x", 0)
     .set("2*x^2 - 5*x + 3")
