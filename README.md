@@ -98,7 +98,7 @@ La instancia de `MathParser` que ejecutó el método.
 let x = 0;
 const parser = new MathParser.Parser({x: 0})
 .set("x^2")
-.repeat(5, function(r) {
+.repeat(5, function(r: number) {
     console.log(r);
     this.constant("x", ++x);
 });
@@ -134,4 +134,53 @@ parser
 .constant("z", 4);
 
 console.log(parser.execute("x + y + z")) // imprime 9.
+```
+
+## `then(callback: Function)`
+Establece una función que se ejecutará después de cada evaluación exitosa producida por `execute()` o `repeat()`.
+
+**Parámetros:**
+- `callback`: La función que se ejecutará una vez evaluada una cadena. La llamada tiene la siguiente forma:
+    ```ts
+    callback(r: number)
+    ```
+    Donde `r` es el resultado de la evaluación.
+
+    Si no se pasa nada como parámetro, no se ejecutará nada y la única forma de obtener el resultado de una evaluación será capturando el valor que devuelve directamente `execute()`.
+
+**Devuelve:** `MathParser`
+
+La instancia de `MathParser` que ejecutó el método.
+
+**Ejemplo:**
+```ts
+const parser = new MathParser.Parser({x: 2, y: 5})
+.then((r: number) => {
+    console.log(`Resultado: r=${r}`);
+})
+.execute("y/x + 1");
+/*
+Resultado: r=3.5
+*/
+```
+
+## `catch(callback: Function)`
+Establece una función que se ejecutará cuando el intérprete encuentre algún error en la evaluación.
+
+**Parámetros:**
+- `callback`: La función que se ejecutará cuando suceda algún error. La llamada tiene la siguiente forma:
+    ```ts
+    callback(e: Error)
+    ```
+    Donde `e` es el error que se ha producido.
+
+**Ejemplo:**
+```ts
+const parser = new MathParser.Parser({x: 1, y: 2})
+.catch((e: Error) => {
+    console.log(`ERROR! ${e.message}`);
+});
+
+parser.execute("x + y"); // devuelve 3.
+parser.execute("x + z"); // Imprime un mensaje de error.
 ```
