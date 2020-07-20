@@ -174,6 +174,8 @@ Establece una función que se ejecutará cuando el intérprete encuentre algún 
     ```
     Donde `e` es el error que se ha producido.
 
+    Si no se pasa ninguna función como parámetro, no se ejecutará nada cuando ocurra un error y por tanto no habrá forma de capturar la información correspondiente.
+
 **Ejemplo:**
 ```ts
 const parser = new MathParser.Parser({x: 1, y: 2})
