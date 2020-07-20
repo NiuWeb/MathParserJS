@@ -1,5 +1,5 @@
 {
-  "name": "mathparserjs",
+  "name": "@bygdle/mathparserjs",
   "version": "1.0.0",
   "description": "Un intérprete de comandos escritos dentro de cadenas de texto.",
   "main": "built/mathparser.js",
