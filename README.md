@@ -1,5 +1,7 @@
 # MathParserJS
- Un intérprete de comandos (operaciones aritméticas, funciones y constantes) escritos dentro de cadenas de texto.
+Un intérprete de comandos (operaciones aritméticas, funciones y constantes) escritos dentro de cadenas de texto.
+
+Puede encontrar un programa de ejemplo en `/src/test.ts`.
 
 # Instalación
 Descargue y copie en su proyecto el archivo `/src/MathParser.ts` para TypeScript, o el archivo `/built/MathParser.js` para JavaScript Nativo.
@@ -43,7 +45,9 @@ Establece la cadena que el intérprete va a evaluar.
 **Parámetros:**
 - `str`: La cadena de texto a establecer.
 
-**Devuelve:** `MathParser` La instancia de `MathParser` que ejecutó el método.
+**Devuelve:** `MathParser` 
+
+La instancia de `MathParser` que ejecutó el método.
 
 **Ejemplo:**
 ```ts
@@ -64,7 +68,9 @@ establecida por el método `set()`.
 **Parámetros:**
 - `str`: La cadena de texto a interpretar.
 
-**Devuelve:** `number` El resultado de la evaluación.
+**Devuelve:** `number` 
+
+El resultado de la evaluación.
 
 **Ejemplo:**
 ```ts
@@ -83,6 +89,10 @@ Evalúa una cantidad determinada de veces la cadena de texto establecida por `se
     ```
     Donde `r` es el resultado de la última evaluación realizada, e `i` es el número de la evaluación actual, desde 1 hasta `n`.
 
+**Devuelve:** `MathParser`
+
+La instancia de `MathParser` que ejecutó el método.
+
 **Ejemplo:**
 ```ts
 let x = 0;
@@ -100,4 +110,28 @@ Imprime:
 9
 16
 */
+```
+
+## `constant(name: string, value: number)`
+Establece el nuevo valor de una constante del intérprete. Si la constante no existe, ésta se creará.
+
+**Parámetros:**
+- `name`: El nombre de la constante a editar/crear.
+- `value`: El valor numérico de la constante a editar/crear.
+
+**Devuelve:** `MathParser`
+
+La instancia de `MathParser` que ejecutó el método.
+
+**Ejemplo:**
+```ts
+const parser = new MathParser.Parser({x: 1, y: 2});
+console.log(parser.execute("x + y")) // imprime 3.
+
+parser
+.constant("x", 2)
+.constant("y", 3)
+.constant("z", 4);
+
+console.log(parser.execute("x + y + z")) // imprime 9.
 ```
