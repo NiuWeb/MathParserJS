@@ -4,9 +4,7 @@ Un intérprete de comandos (operaciones aritméticas, funciones y constantes) es
 Puede encontrar un programa de ejemplo en `/src/test.ts`.
 
 # Instalación
-Descargue y copie en su proyecto el archivo `/src/MathParser.ts` para TypeScript, o el archivo `/built/MathParser.js` para JavaScript Nativo.
-
-También puede realizar la instalación a través de npm:
+Instale el programa a través de npm:
 ```
 npm install @bygdle/mathparserjs
 ```
@@ -14,14 +12,10 @@ npm install @bygdle/mathparserjs
 # Importación
 Si utiliza TypeScript, importe el módulo de la siguiente forma:
 ```ts
-import {MathParser} from "./MathParser";
-//si se instaló desde npm:
 import {MathParser} from "@bygdle/MathParser";
 ```
 Si utiliza JavaScript nativo, importe el módulo de la siguiente forma:
 ```js
-const MathParser = require("./MathParser").MathParser;
-//si se instaló desde npm:
 const MathParser = require("@bygdle/MathParser").MathParser;
 ```
 
