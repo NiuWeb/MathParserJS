@@ -18,6 +18,7 @@ parser.execute("(1 + 5^0.5)/2");
 parser.execute("sin(pi/2)^2 + cos(pi/2)^2");
 // otros cálculos
 parser.execute("cos(pi) - 6/2*(2+1)");
+parser.execute("1 + 1/2 + 1/4");
 
 // CREANDO UNA TABLA DE VALORES.
 console.log("====TABLA DE VALORES====")
