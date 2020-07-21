@@ -262,11 +262,11 @@ var MathParser;
             var result = 0;
             try {
                 result = this.parseGroup(str);
-                if (this.finally !== null)
+                if (typeof (this.finally) == "function")
                     this.finally.apply(this, [result]);
             }
             catch (error) {
-                if (this.exception !== null)
+                if (typeof (this.exception) == "function")
                     this.exception.apply(this, [error]);
             }
             finally {
