@@ -388,7 +388,7 @@ export namespace MathParser {
                     throw new Error(ErrorInfo.refference(constName));
                 }
                 // Devolver el valor de la constante
-                return backwards + c.value.toString();
+                return `${backwards}[[${c.value}]]`;
             });
             // Evaluar la expresión resultante
             return this.parseArithmetic(str);

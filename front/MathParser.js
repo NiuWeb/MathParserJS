@@ -230,7 +230,7 @@ var MathParser = (function () {
                     if (!c) {
                         throw new Error(ErrorInfo.refference(constName));
                     }
-                    return backwards + c.value.toString();
+                    return backwards + "[[" + c.value + "]]";
                 });
             return this.parseArithmetic(str);
         };
