@@ -4,6 +4,41 @@ escritos dentro de cadenas de texto.
 
 Puede encontrar un programa de ejemplo en `/src/test.ts`.
 
+# Expresiones
+El intérprete soporta las siguientes expresiones:
+
+- Números reales, con o sin signo, parte decimal y con notación exponencial.
+    ```
+    1
+    1.003
+    -45.23
+    2e5
+    10e-13
+    ```
+- Operaciones aritméticas (`+ - * / % ^`) entre números.
+    ```
+    1.65+0.0013
+    1/2e5
+    -5^2
+    ```
+- Agrupadores.
+    ```
+    (-5)^2
+    6/2*(2+1)
+    (1+(3*2-1)^0.5)/2
+    ```
+- Constantes (ver más abajo).
+    ```
+    x^2 - y
+    e^2
+    pi/4 + pi/8
+    ```
+- Funciones (ver más abajo).
+    ```
+    1-cos(pi)^2
+    sqrt(25)/abs(-5)
+    ```
+
 # Instalación
 Instale el programa a través de npm:
 ```
