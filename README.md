@@ -10,13 +10,6 @@ Instale el programa a través de npm:
 npm install @bygdle/mathparserjs
 ```
 
-Si necesita instalar el script para JavaScript del lado del cliente, 
-importe el archivo `/front/MathParser.js`, como se muestra a continuación:
-```html
-<script type="text/javascript" src="MathParser.js"></script>
-```
-Puede encontrar un programa de ejemplo en `/front/test.html`.
-
 # Importación
 Si utiliza TypeScript, importe el módulo de la siguiente forma:
 ```ts
@@ -26,8 +19,13 @@ Si utiliza JavaScript nativo, importe el módulo de la siguiente forma:
 ```js
 const MathParser = require("@bygdle/mathparserjs").MathParser;
 ```
-Si utiliza el script del lado del cliente, se creará automáticamente 
-el objeto global `MathParser`.
+Si utiliza el script del lado del cliente, importe el archivo 
+`/front/MathParser.js`, como se muestra a continuación:
+```html
+<script type="text/javascript" src="MathParser.js"></script>
+```
+se creará automáticamente el objeto global `MathParser`. Puede encontrar 
+un programa de ejemplo en `/front/test.html`. 
 
 # Clase Parser
 ## Constructor `Parser(list)`
