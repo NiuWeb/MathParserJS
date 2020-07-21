@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>MathParserJS frontend test</title>
+        <meta charset="utf-8">
+
+        <style>
+            html,body {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                margin:0;
+                font-family: 'Courier New', Courier, monospace;
+            }
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-direction: column;
+                background-color: #333;
+                color: #eee;
+            }
+            input {
+                padding:0.5em;
+                font-family: 'Courier New', Courier, monospace;
+                background-color: #222;
+                border:1px solid black;
+                color: #eee;
+                font-size: 24pt;
+            }
+            input[type="text"] {
+                width:50vw;
+            }
+            #error {
+                width:50%;
+                padding:1em;
+                background-color: rgba(255, 0, 0, 0.2);
+                border: 1px solid red;
+            }
+            .block {
+                background-color: #222;
+                border: 1px solid black;
+                padding: 0.5em;
+                width:25%;
+                text-align: center;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>Intérprete de comandos</h1>
+        <div>
+            <input type="text" id="input" placeholder="Ingrese el comando a ejecutar...">
+            <input type="button" id="send" value="Ejecutar">
+        </div>
+        <br>
+        <input type="text" id="output" placeholder="Resultado..." readonly>
+        <div id="error"></div>
+        <h1>Lista de constantes</h1>
+        <div class="block" id="clist"></div>
+        <h1>Lista de funciones</h1>
+        <div class="block" id="flist"></div>
+
+        <script type="text/javascript" src="MathParser.js"></script>
+        <script type="text/javascript" src="Functions.js"></script>
+        <script type="text/javascript">
+            window.onload = function() {
+                var input  = document.getElementById("input");
+                var output = document.getElementById("output");
+                var button = document.getElementById("send");
+                var error  = document.getElementById("error");
+
+                var clist = document.getElementById("clist");
+                var flist = document.getElementById("flist");
+
+                error.style.display = 'none';
+
+                var parser = new MathParser.Parser(functions)
+                .then(function(res) {
+                    output.value = res;
+                })
+                .catch(function(err) {
+                    console.error("Error del intérprete: " + err.message);
+                    error.style.display = '';
+                    error.innerText = err;
+                });
+
+                for(var i = 0; i < parser.constants.list.length; i++) {
+                    clist.innerText += parser.constants.list[i].n + "\n";
+                }
+                var arr = 'abcd'.split('');
+                for(var i = 0; i < parser.functions.list.length; i++) {
+                    var f = parser.functions.list[i];
+                    var p = arr.slice(0, f.f.length).join(', ');
+                    flist.innerText += f.n + "(" + p + ");" + "\n";
+                }
+                button.onclick = function() {
+                    error.style.display = 'none';
+                    error.innerText = '';
+                    parser.execute(input.value);
+                };
+            };
+        </script>
+    </body>
+</html>
