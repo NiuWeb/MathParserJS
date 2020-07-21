@@ -92,12 +92,13 @@ var MathParser;
         function Parser(list) {
             this.patterns = {
                 empty: /^(\s*)$/,
-                ssign: /^(\+|-)/i,
+                ssign: /^\s*(\+|-)/i,
                 signs: /((?:\+|-)+)/ig,
                 number: /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/ig,
                 constant: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)/i,
                 group: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i,
                 group2: /\[([^\[\]]*)\]/i,
+                group3: /\[\[([^\[\]]*)\]\]/i
             };
             this.mathPatterns = [
                 /([0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\^)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
@@ -172,22 +173,30 @@ var MathParser;
         Parser.prototype.parseArithmetic = function (str) {
             var _this = this;
             if (str.match(this.patterns.empty)) {
-                return 0;
+                return '0';
             }
+            while (str.match(this.patterns.group3))
+                str = str.replace(this.patterns.group3, '[$1]');
             str = str.replace(/\s+/g, '');
-            str = str.replace(this.patterns.signs, function (signs) {
-                var split = signs.split('');
-                return split.reduce(function (prev, curr) {
-                    if (prev == curr)
-                        return '+';
-                    return '-';
+            str = str.replace(this.patterns.ssign, '$11*');
+            var self = this;
+            function collapse() {
+                str = str.replace(self.patterns.signs, function (signs) {
+                    var split = signs.split('');
+                    return split.reduce(function (prev, curr) {
+                        if (prev == curr)
+                            return '+';
+                        return '-';
+                    });
+                    ;
                 });
-                ;
-            });
+                return str;
+            }
+            collapse();
             var matches;
             this.mathPatterns.forEach(function (exp) {
                 while (str.match(exp))
-                    str = str.replace(exp, function (input) {
+                    str = collapse().replace(exp, function (input) {
                         matches = exp.exec(input);
                         if (!matches)
                             return 'NaN';
@@ -200,12 +209,13 @@ var MathParser;
                         return output;
                     });
             });
-            str = str.replace(this.patterns.group2, '$1');
+            while (str.match(this.patterns.group2))
+                str = str.replace(this.patterns.group2, '$1');
             var check = str.replace(this.patterns.number, '');
             if (!check.match(this.patterns.empty)) {
                 throw new Error(ErrorInfo.syntax(check));
             }
-            return parseFloat(str);
+            return '[' + (str) + ']';
         };
         Parser.prototype.parseConstants = function (str) {
             var _this = this;
@@ -244,7 +254,9 @@ var MathParser;
                     funcParams.forEach(function (it) {
                         if (!it.match(_this.patterns.empty)) {
                             it = it.replace(_this.patterns.group2, '$1');
-                            params.push(_this.parseConstants(it));
+                            it = _this.parseConstants(it);
+                            it = it.replace(_this.patterns.group2, '$1');
+                            params.push(parseFloat(it));
                         }
                     });
                     var result;
@@ -260,12 +272,12 @@ var MathParser;
                     }
                     else {
                         if (params.length >= 1) {
-                            result = params[0];
+                            result = params[0].toString();
                         }
                         else
-                            result = 0;
+                            result = '0';
                     }
-                    return backwards + "[" + result + "]";
+                    return backwards + "[[" + result + "]]";
                 });
             return this.parseConstants(str);
         };
@@ -273,7 +285,7 @@ var MathParser;
             if (str === void 0) { str = this.input; }
             var result = 0;
             try {
-                result = this.parseGroup(str);
+                result = parseFloat(this.parseGroup(str).replace(this.patterns.group2, '$1'));
                 if (typeof (this.finally) == "function")
                     this.finally.apply(this, [result]);
             }

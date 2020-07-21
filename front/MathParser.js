@@ -89,16 +89,26 @@ var MathParser = (function () {
         function Parser(list) {
             this.patterns = {
                 empty: /^(\s*)$/,
-                addition: /((?:\+|-)+)/ig,
+                ssign: /^(\+|-)/i,
+                signs: /((?:\+|-)+)/ig,
+                number: /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/ig,
                 constant: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)/i,
-                group: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i
+                group: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i,
+                group2: /\[([^\[\]]*)\]/i,
             };
-            this.numberPattern = "((?:\\+|-)?[0-9]+(?:\\.[0-9]+)?(?:E(?:\\+|-)?[0-9]+)?)";
-            this.numberExp = new RegExp(this.numberPattern, 'ig');
             this.mathPatterns = [
-                new RegExp(this.numberPattern + "(\\^)" + this.numberPattern, 'i'),
-                new RegExp(this.numberPattern + "(\\*|\\/|%)" + this.numberPattern, 'i'),
-                new RegExp(this.numberPattern + "(\\+|-)" + this.numberPattern, 'i')
+                /([0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\^)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+                /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\^)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+                /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\^)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+                /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\^)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+                /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\*|\/|%)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+                /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\*|\/|%)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+                /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\*|\/|%)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+                /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\*|\/|%)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+                /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\+|-)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+                /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\+|-)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+                /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\+|-)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+                /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\+|-)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i
             ];
             this.constants = new Searchable();
             this.functions = new Searchable();
@@ -162,7 +172,7 @@ var MathParser = (function () {
                 return 0;
             }
             str = str.replace(/\s+/g, '');
-            str = str.replace(this.patterns.addition, function (signs) {
+            str = str.replace(this.patterns.signs, function (signs) {
                 var split = signs.split('');
                 return split.reduce(function (prev, curr) {
                     if (prev == curr)
@@ -187,7 +197,8 @@ var MathParser = (function () {
                         return output;
                     });
             });
-            var check = str.replace(this.numberExp, '');
+            str = str.replace(this.patterns.group2, '$1');
+            var check = str.replace(this.patterns.number, '');
             if (!check.match(this.patterns.empty)) {
                 throw new Error(ErrorInfo.syntax(check));
             }
@@ -202,7 +213,7 @@ var MathParser = (function () {
                         return match;
                     var backwards = matches[1];
                     var constName = matches[2];
-                    if (backwards.match(_this.numberExp)) {
+                    if (backwards.match(_this.patterns.number)) {
                         throw new Error(ErrorInfo.syntax(backwards + constName));
                     }
                     var c = _this.constants.search(constName);
@@ -223,12 +234,13 @@ var MathParser = (function () {
                     var backwards = matches[1];
                     var funcName = matches[2];
                     var funcParams = matches[3].split(/\s*\,\s*/);
-                    if (backwards.match(_this.numberExp)) {
+                    if (backwards.match(_this.patterns.number)) {
                         throw new Error(ErrorInfo.syntax(backwards + funcName));
                     }
                     var params = new Array();
                     funcParams.forEach(function (it) {
                         if (!it.match(_this.patterns.empty)) {
+                            it = it.replace(_this.patterns.group2, '$1');
                             params.push(_this.parseConstants(it));
                         }
                     });
@@ -250,7 +262,7 @@ var MathParser = (function () {
                         else
                             result = 0;
                     }
-                    return backwards + result.toString();
+                    return backwards + "[" + result + "]";
                 });
             return this.parseConstants(str);
         };
@@ -296,5 +308,5 @@ var MathParser = (function () {
         };
         return Parser;
     }());
-    return{Parser};
+    return {Parser};
 })();

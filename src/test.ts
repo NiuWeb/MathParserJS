@@ -11,9 +11,8 @@ var parser = new MathParser.Parser(functions)
 .catch((error: Error) => {
     console.log("Error: ", error);
 });
-
-parser.execute("log(log(2, 3), log(3, 4))");
-
+//Operación con potencias
+parser.execute("5^2-(-5^2)");
 // Calcular el número áureo.
 parser.execute("(1 + 5^0.5)/2");
 // Identidad trigonométrica

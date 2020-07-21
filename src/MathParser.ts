@@ -148,12 +148,13 @@ export namespace MathParser {
         // Expresiones regulares
         private patterns = {
             empty:    /^(\s*)$/,
-            ssign:    /^(\+|-)/i,
+            ssign:    /^\s*(\+|-)/i,
             signs:    /((?:\+|-)+)/ig,
             number:   /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/ig,
             constant: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)/i,
             group:    /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i,
             group2:   /\[([^\[\]]*)\]/i,
+            group3:   /\[\[([^\[\]]*)\]\]/i
         };
 
         // RegExp de las operaciones aritméticas, en orden jerárquico
@@ -281,35 +282,44 @@ export namespace MathParser {
          * lanza un error si la cadena contiene caracteres no válidos
          * @param str La cadena a analizar
          */
-        private parseArithmetic(str: string): number {
+        private parseArithmetic(str: string): string {
             // Devolver cero si no hay operación que evaluar
             if(str.match(this.patterns.empty)) {
-                return 0;
+                return '0';
             }
+            // Eliminar agrupadores múltiples ([[a]])
+            while(str.match(this.patterns.group3))
+                str = str.replace(this.patterns.group3, '[$1]');
 
             // Eliminar espacios en blanco
             str = str.replace(/\s+/g, '');
 
+            str = str.replace(this.patterns.ssign, '$11*');
+
             // Colapsar múltiples signos de adición/sustracción en uno solo
-            str = str.replace(this.patterns.signs, (signs: string) => {
-                let split = signs.split('');
-                return split.reduce((prev: string, curr: string) => {
-                    // Signos iguales: +
-                    if(prev == curr)
-                        return '+';
-                    // Signos diferentes: -
-                    return '-';
-                });;
-            });
+            let self = this;
+            function collapse() {
+                str = str.replace(self.patterns.signs, (signs: string) => {
+                    let split = signs.split('');
+                    return split.reduce((prev: string, curr: string) => {
+                        // Signos iguales: +
+                        if(prev == curr)
+                            return '+';
+                        // Signos diferentes: -
+                        return '-';
+                    });;
+                });
+                return str;
+            }
+            collapse();
             // Evaluar las operaciones aritméticas en el orden jerárquico correspondiente
             let matches: Array<string>;
             this.mathPatterns.forEach((exp: RegExp) => {
                 // Buscar coincidencias de la forma AoB
                 while(str.match(exp))
                 // Reemplazar coincidencia por su valor evaluado
-                str = str.replace(exp, (input: string) => {
+                str = collapse().replace(exp, (input: string) => {
                     // Input: coincidencia encontrada
-                    
                     // Obtener partes de la operación (operandos+operador)
                     matches = exp.exec(input); 
                     if(!matches) // Si no se encontraron las partes
@@ -332,7 +342,9 @@ export namespace MathParser {
                 });
             });
             // Comprobar errores de sintaxis (elementos no numéricos)
-            str = str.replace(this.patterns.group2, '$1');
+            // Eliminar agrupadores
+            while(str.match(this.patterns.group2))
+                str = str.replace(this.patterns.group2, '$1');
             // Eliminar todos los elementos numéricos
             let check: string = str.replace(this.patterns.number, '');
             // Si queda algo,
@@ -341,14 +353,14 @@ export namespace MathParser {
                 throw new Error(ErrorInfo.syntax(check));
             }
             // Devolver resultado
-            return parseFloat(str);
+            return '[' + (str) + ']';
         }
         /**
          * Reemplaza los nombres de constantes por sus correspondientes errores,
          * o lanza un error si alguna constante no existe.
          * @param str La cadena a analizar
          */
-        private parseConstants(str: string):number {
+        private parseConstants(str: string):string {
             // Buscar todos los nombres de constantes en la cadena
             while(str.match(this.patterns.constant))
             str = str.replace(this.patterns.constant, (match: string) => {
@@ -386,7 +398,7 @@ export namespace MathParser {
          * y los evalúa. Lanza un error si una función no existe.
          * @param str La cadena a analizar
          */
-        private parseGroup(str: string):number {
+        private parseGroup(str: string):string {
             // Buscar coincidencias, evaluarlas y seguir buscando
             while(str.match(this.patterns.group))
             str = str.replace(this.patterns.group, (match: string) => {
@@ -416,12 +428,14 @@ export namespace MathParser {
                     // Si el parámetro no está vacío
                     if(!it.match(this.patterns.empty)) {
                         it = it.replace(this.patterns.group2, '$1');
+                        it = this.parseConstants(it);
+                        it = it.replace(this.patterns.group2, '$1');
                         // Ejecutar y añadir a la lista.
-                        params.push(this.parseConstants(it));
+                        params.push(parseFloat(it));
                     }
                 });
                 // Resultado del grupo/función.
-                let result: number;
+                let result: string;
 
                 // Si el grupo es una función (p.e: 1 + sqrt(x) )
                 if(funcName) {
@@ -443,14 +457,14 @@ export namespace MathParser {
                 else {
                     // Devolver el primer parámetro si tiene
                     if(params.length >= 1) {
-                        result = params[0];
+                        result = params[0].toString();
                     }
                     // Si no tiene devolver cero.
-                    else result = 0;
+                    else result = '0';
                 }
                 // Reemplazar coincidencia por su resultado, sin
                 // perder el caracter anterior.
-                return `${backwards}[${result}]`;//backwards + result.toString();
+                return `${backwards}[[${result}]]`;//backwards + result.toString();
             });
             // Ejecutar resultado
             return this.parseConstants(str);
@@ -460,9 +474,9 @@ export namespace MathParser {
          * @param str La cadena a analizar
          */
         public execute(str: string = this.input): number {
-            let result = 0;
+            let result:number = 0;
             try {
-                result = this.parseGroup(str);
+                result = parseFloat(this.parseGroup(str).replace(this.patterns.group2, '$1'));
                 if(typeof(this.finally) == "function")
                     this.finally.apply(this, [result]);
             }
