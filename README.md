@@ -20,11 +20,11 @@ Puede encontrar un programa de ejemplo en `/front/test.html`.
 # Importación
 Si utiliza TypeScript, importe el módulo de la siguiente forma:
 ```ts
-import {MathParser} from "@bygdle/MathParser";
+import {MathParser} from "@bygdle/mathparserjs";
 ```
 Si utiliza JavaScript nativo, importe el módulo de la siguiente forma:
 ```js
-const MathParser = require("@bygdle/MathParser").MathParser;
+const MathParser = require("@bygdle/mathparserjs").MathParser;
 ```
 Si utiliza el script del lado del cliente, se creará automáticamente 
 el objeto global `MathParser`.
