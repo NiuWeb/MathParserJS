@@ -59,9 +59,9 @@ Establece la cadena que el intérprete va a evaluar.
 **Parámetros:**
 - `str`: La cadena de texto a establecer.
 
-**Devuelve:** `MathParser` 
+**Devuelve:** `Parser` 
 
-La instancia de `MathParser` que ejecutó el método.
+La instancia de `Parser` que ejecutó el método.
 
 **Ejemplo:**
 ```ts
@@ -107,9 +107,9 @@ La llamada tiene la siguiente forma:
     Donde `r` es el resultado de la última evaluación realizada, 
     e `i` es el número de la evaluación actual, desde 1 hasta `n`.
 
-**Devuelve:** `MathParser`
+**Devuelve:** `Parser`
 
-La instancia de `MathParser` que ejecutó el método.
+La instancia de `Parser` que ejecutó el método.
 
 **Ejemplo:**
 ```ts
@@ -138,9 +138,9 @@ Si la constante no existe, ésta se creará.
 - `name`: El nombre de la constante a editar/crear.
 - `value`: El valor numérico de la constante a editar/crear.
 
-**Devuelve:** `MathParser`
+**Devuelve:** `Parser`
 
-La instancia de `MathParser` que ejecutó el método.
+La instancia de `Parser` que ejecutó el método.
 
 **Ejemplo:**
 ```ts
@@ -171,9 +171,9 @@ La llamada tiene la siguiente forma:
     la única forma de obtener el resultado de una evaluación 
     será capturando el valor que devuelve directamente `execute()`.
 
-**Devuelve:** `MathParser`
+**Devuelve:** `Parser`
 
-La instancia de `MathParser` que ejecutó el método.
+La instancia de `Parser` que ejecutó el método.
 
 **Ejemplo:**
 ```ts
@@ -202,6 +202,10 @@ error. La llamada tiene la siguiente forma:
     Si no se pasa ninguna función como parámetro, no se ejecutará 
     nada cuando ocurra un error y por tanto no habrá forma de 
     capturar la información correspondiente.
+
+**Devuelve:** `Parser`
+
+La instancia de `Parser` que ejecutó el método.
 
 **Ejemplo:**
 ```ts
