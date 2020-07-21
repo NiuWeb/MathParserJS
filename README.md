@@ -1,5 +1,6 @@
 # MathParserJS
-Un intérprete de comandos (operaciones aritméticas, funciones y constantes) escritos dentro de cadenas de texto.
+Un intérprete de comandos (operaciones aritméticas, funciones y constantes) 
+escritos dentro de cadenas de texto.
 
 Puede encontrar un programa de ejemplo en `/src/test.ts`.
 
@@ -9,7 +10,8 @@ Instale el programa a través de npm:
 npm install @bygdle/mathparserjs
 ```
 
-Si necesita instalar el script para JavaScript del lado del cliente, importe el archivo `/front/MathParser.js`, como se muestra a continuación:
+Si necesita instalar el script para JavaScript del lado del cliente, 
+importe el archivo `/front/MathParser.js`, como se muestra a continuación:
 ```html
 <script type="text/javascript" src="MathParser.js"></script>
 ```
@@ -24,7 +26,8 @@ Si utiliza JavaScript nativo, importe el módulo de la siguiente forma:
 ```js
 const MathParser = require("@bygdle/MathParser").MathParser;
 ```
-Si utiliza el script del lado del cliente, se creará automáticamente el objeto global `MathParser`.
+Si utiliza el script del lado del cliente, se creará automáticamente 
+el objeto global `MathParser`.
 
 # Clase Parser
 ## Constructor `Parser(list)`
@@ -33,7 +36,8 @@ MathParser.Parser(list);
 ```
 
 **Parámetros:**
-- `list`: Un objeto con las constantes/funciones que debe evaluar el intérprete, y sus respectivos valores/callbacks.
+- `list`: Un objeto con las constantes/funciones que debe evaluar el 
+intérprete, y sus respectivos valores/callbacks.
 
 **Ejemplo**
 ```ts
@@ -89,15 +93,19 @@ console.log(r); // Imprime -10
 ```
 
 ## `repeat(n: number, callback: Function)`
-Evalúa una cantidad determinada de veces la cadena de texto establecida por `set()`, y después de cada evaluación ejecuta el callback proporcionado.
+Evalúa una cantidad determinada de veces la cadena de texto 
+establecida por `set()`, y después de cada evaluación ejecuta 
+el callback proporcionado.
 
 **Parámetros:**
 - `n`: el número de veces que se va a evaluar la cadena.
-- `callback`: La función que se ejecutará después de cada iteración. La llamada tiene la siguiente forma:
+- `callback`: La función que se ejecutará después de cada iteración. 
+La llamada tiene la siguiente forma:
     ```ts
     callback(r: number, i: number)
     ```
-    Donde `r` es el resultado de la última evaluación realizada, e `i` es el número de la evaluación actual, desde 1 hasta `n`.
+    Donde `r` es el resultado de la última evaluación realizada, 
+    e `i` es el número de la evaluación actual, desde 1 hasta `n`.
 
 **Devuelve:** `MathParser`
 
@@ -123,7 +131,8 @@ Imprime:
 ```
 
 ## `constant(name: string, value: number)`
-Establece el nuevo valor de una constante del intérprete. Si la constante no existe, ésta se creará.
+Establece el nuevo valor de una constante del intérprete. 
+Si la constante no existe, ésta se creará.
 
 **Parámetros:**
 - `name`: El nombre de la constante a editar/crear.
@@ -147,16 +156,20 @@ console.log(parser.execute("x + y + z")) // imprime 9.
 ```
 
 ## `then(callback: Function)`
-Establece una función que se ejecutará después de cada evaluación exitosa producida por `execute()` o `repeat()`.
+Establece una función que se ejecutará después de cada evaluación 
+exitosa producida por `execute()` o `repeat()`.
 
 **Parámetros:**
-- `callback`: La función que se ejecutará una vez evaluada una cadena. La llamada tiene la siguiente forma:
+- `callback`: La función que se ejecutará una vez evaluada una cadena. 
+La llamada tiene la siguiente forma:
     ```ts
     callback(r: number)
     ```
     Donde `r` es el resultado de la evaluación.
 
-    Si no se pasa nada como parámetro, no se ejecutará nada y la única forma de obtener el resultado de una evaluación será capturando el valor que devuelve directamente `execute()`.
+    Si no se pasa nada como parámetro, no se ejecutará nada y 
+    la única forma de obtener el resultado de una evaluación 
+    será capturando el valor que devuelve directamente `execute()`.
 
 **Devuelve:** `MathParser`
 
@@ -175,16 +188,20 @@ Resultado: r=3.5
 ```
 
 ## `catch(callback: Function)`
-Establece una función que se ejecutará cuando el intérprete encuentre algún error en la evaluación.
+Establece una función que se ejecutará cuando el intérprete 
+encuentre algún error en la evaluación.
 
 **Parámetros:**
-- `callback`: La función que se ejecutará cuando suceda algún error. La llamada tiene la siguiente forma:
+- `callback`: La función que se ejecutará cuando suceda algún 
+error. La llamada tiene la siguiente forma:
     ```ts
     callback(e: Error)
     ```
     Donde `e` es el error que se ha producido.
 
-    Si no se pasa ninguna función como parámetro, no se ejecutará nada cuando ocurra un error y por tanto no habrá forma de capturar la información correspondiente.
+    Si no se pasa ninguna función como parámetro, no se ejecutará 
+    nada cuando ocurra un error y por tanto no habrá forma de 
+    capturar la información correspondiente.
 
 **Ejemplo:**
 ```ts
