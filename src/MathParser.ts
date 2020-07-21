@@ -148,23 +148,37 @@ export namespace MathParser {
         // Expresiones regulares
         private patterns = {
             empty:    /^(\s*)$/,
-            addition: /((?:\+|-)+)/ig,
+            ssign:    /^(\+|-)/i,
+            signs:    /((?:\+|-)+)/ig,
+            number:   /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/ig,
             constant: /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)/i,
-            group:    /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i
+            group:    /([^a-zA-Z0-9_]|^)([a-zA-Z_][a-zA-Z0-9_]*)?\(([^()]*)\)/i,
+            group2:   /\[([^\[\]]*)\]/i,
         };
-        // RegExp de un número real, como string y como objeto.
-        private numberPattern: string = "((?:\\+|-)?[0-9]+(?:\\.[0-9]+)?(?:E(?:\\+|-)?[0-9]+)?)";
-        private numberExp: RegExp = new RegExp(this.numberPattern, 'ig');
 
         // RegExp de las operaciones aritméticas, en orden jerárquico
         private mathPatterns: Array<RegExp> = [
-
             // Potencias
-            new RegExp(this.numberPattern + "(\\^)" + this.numberPattern, 'i'),
+            /([0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\^)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+            //Potencias agrupadas
+            /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\^)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+            /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\^)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+            /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\^)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+
+            
             // Multiplicación, división y módulo
-            new RegExp(this.numberPattern + "(\\*|\\/|%)" + this.numberPattern, 'i'),
+            /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\*|\/|%)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+            // Multiplicación, división y módulo agrupados
+            /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\*|\/|%)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+            /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\*|\/|%)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+            /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\*|\/|%)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+
             // Suma y resta
-            new RegExp(this.numberPattern + "(\\+|-)" + this.numberPattern, 'i')
+            /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\+|-)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+            // Suma y resta agrupados
+            /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\+|-)((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)/i,
+            /\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\](\+|-)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i,
+            /((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)(\+|-)\[((?:\+|-)?[0-9]+(?:\.[0-9]+)?(?:E(?:\+|-)?[0-9]+)?)\]/i
 
         ];
 
@@ -277,7 +291,7 @@ export namespace MathParser {
             str = str.replace(/\s+/g, '');
 
             // Colapsar múltiples signos de adición/sustracción en uno solo
-            str = str.replace(this.patterns.addition, (signs: string) => {
+            str = str.replace(this.patterns.signs, (signs: string) => {
                 let split = signs.split('');
                 return split.reduce((prev: string, curr: string) => {
                     // Signos iguales: +
@@ -287,7 +301,6 @@ export namespace MathParser {
                     return '-';
                 });;
             });
-            
             // Evaluar las operaciones aritméticas en el orden jerárquico correspondiente
             let matches: Array<string>;
             this.mathPatterns.forEach((exp: RegExp) => {
@@ -301,11 +314,11 @@ export namespace MathParser {
                     matches = exp.exec(input); 
                     if(!matches) // Si no se encontraron las partes
                         return 'NaN'; // Devolver Nan
-
                     // Partes de la operación AoB
                     let A: number = parseFloat(matches[1]);
                     let B: number = parseFloat(matches[3]);
                     let o: string = matches[2];
+
 
                     // Evaluar operación aritmética
                     let result: number = this.evalArithmetic(A, B, o);
@@ -319,8 +332,9 @@ export namespace MathParser {
                 });
             });
             // Comprobar errores de sintaxis (elementos no numéricos)
+            str = str.replace(this.patterns.group2, '$1');
             // Eliminar todos los elementos numéricos
-            let check: string = str.replace(this.numberExp, '');
+            let check: string = str.replace(this.patterns.number, '');
             // Si queda algo,
             if(!check.match(this.patterns.empty)) {
                 // Tirar error
@@ -350,7 +364,7 @@ export namespace MathParser {
 
                 // Si el caracter anterior es un número
                 // (p.e: 2sqrt),
-                if(backwards.match(this.numberExp)) {
+                if(backwards.match(this.patterns.number)) {
                     // Lanzar error
                     throw new Error(ErrorInfo.syntax(backwards + constName));
                 }
@@ -389,7 +403,7 @@ export namespace MathParser {
 
                 // Si el caracter anterior es un número
                 // (p.e: 2sqrt),
-                if(backwards.match(this.numberExp)) {
+                if(backwards.match(this.patterns.number)) {
                     // Lanzar error
                     throw new Error(ErrorInfo.syntax(backwards + funcName));
                 }
@@ -401,6 +415,7 @@ export namespace MathParser {
                 funcParams.forEach((it: string) => {
                     // Si el parámetro no está vacío
                     if(!it.match(this.patterns.empty)) {
+                        it = it.replace(this.patterns.group2, '$1');
                         // Ejecutar y añadir a la lista.
                         params.push(this.parseConstants(it));
                     }
@@ -435,7 +450,7 @@ export namespace MathParser {
                 }
                 // Reemplazar coincidencia por su resultado, sin
                 // perder el caracter anterior.
-                return backwards + result.toString();
+                return `${backwards}[${result}]`;//backwards + result.toString();
             });
             // Ejecutar resultado
             return this.parseConstants(str);
