@@ -4,6 +4,9 @@ escritos dentro de cadenas de texto.
 
 Puede encontrar un programa de ejemplo en `/src/test.ts`.
 
+Programa de prueba en línea:
+https://niuweb.github.io/MathParserJS/front/test.html
+
 # Expresiones
 El intérprete soporta las siguientes expresiones:
 
